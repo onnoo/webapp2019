@@ -4,7 +4,7 @@ window.onload = function() {
     var radioBtn = $$("div#category label input");
     var categoryOpt = undefined;
     for (var i = 0; i < radioBtn.length; i++) {
-      if (radioBtn[i].checked == true) {
+      if (radioBtn[i].checked) {
         categoryOpt = radioBtn[i].value;
       }
     }
@@ -15,11 +15,21 @@ window.onload = function() {
       onSuccess: showBooks_XML,
       onFailure: ajaxFailed,
       onException: ajaxFailed
-    })
-  }
+    });
+  };
   $("b_json").onclick=function(){
-        //construct a Prototype Ajax.request object
-  }
+    //construct a Prototype Ajax.request object
+    var radioBtn = $$("div#category label input");
+    var categoryOpt = getCheckedRadio(radioBtn);
+
+    new Ajax.Request("books_json.php", {
+      method: "get",
+      parameters: {category: categoryOpt},
+      onSuccess: showBooks_JSON,
+      onFailure: ajaxFailed,
+      onException: ajaxFailed
+    });
+  };
 };
 
 function getCheckedRadio(radio_button){
@@ -44,13 +54,26 @@ function showBooks_XML(ajax) {
     var year = books[i].getElementsByTagName("year")[0].firstChild.nodeValue;
     
     var li = document.createElement("li");
-    li.innerHTML = `${title}, by ${author} (${year})`;
+    li.innerText = title + ", by " + author + " (" + year +")";
     bookList.appendChild(li);
   }
 }
 
 function showBooks_JSON(ajax) {
-	alert(ajax.responseText);
+  // alert(ajax.responseText);
+  var bookList = $("books");
+  bookList.innerHTML = "";
+
+  var books = JSON.parse(ajax.responseText).books;
+  for (var i = 0; i < books.length; i++) {
+    var title = books[i].title;
+    var author = books[i].author;
+    var year = books[i].year;
+
+    var li = document.createElement("li");
+    li.innerText = title + ", by " + author + " (" + year +")";
+    bookList.appendChild(li);
+  }
 }
 
 function ajaxFailed(ajax, exception) {
